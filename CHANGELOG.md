@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 (2026-10-08)
+
+- The data licence travels with every answer: the result footer and the server instructions state CC BY 4.0
+  with attribution to AntSeedStats (antseedstats.com), and point at the site's front door for agents,
+  https://antseedstats.com/llms.txt. README links llms.txt and the For agents page.
+
 ## 0.1.1 (2026-10-08)
 
 - HTTP: a JSON-RPC batch costs one unit of the per-IP budget per message and is capped at 10 messages per

@@ -5,7 +5,7 @@
 import type { Envelope } from "./api-client.js";
 import type { CatalogEndpoint } from "../catalog.js";
 
-export const FOOTER = "Source: AntSeedStats (antseedstats.com), compiled from Base chain data. Cite the page above. Not financial advice; verify critical figures on-chain.";
+export const FOOTER = "Source: AntSeedStats (antseedstats.com), compiled from Base chain data, CC BY 4.0 with attribution. Cite the page above. Not financial advice; verify critical figures on-chain.";
 
 export function headerLine(e: CatalogEndpoint, env: Envelope, page: string): string {
   const m = env.meta;

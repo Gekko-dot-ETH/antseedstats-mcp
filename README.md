@@ -104,10 +104,11 @@ npm run build
 
 ## Links
 
-- [AntSeedStats](https://antseedstats.com) · [Developers](https://antseedstats.com/developers) · [OpenAPI](https://antseedstats.com/api/v1/openapi.json)
+- [AntSeedStats](https://antseedstats.com) · [Developers](https://antseedstats.com/developers) · [OpenAPI](https://antseedstats.com/api/v1/openapi.json) · [llms.txt](https://antseedstats.com/llms.txt) · [For agents](https://antseedstats.com/for-agents)
 - [AntSeed](https://antseed.com), the marketplace
 - Built by [gekko.eth](https://x.com/gekko_eth)
 
 ## License
 
-[MIT](LICENSE)
+The code is [MIT](LICENSE). The data the tools return is published by AntSeedStats under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): free to use with attribution to AntSeedStats (antseedstats.com).
