@@ -41,24 +41,34 @@ export const MAX_BATCH = 10;
 /** Request body ceiling, shared by the parser and the 413 message. */
 export const BODY_LIMIT = "1mb";
 
+function xffHops(req: Request): string[] {
+  const xff = req.headers["x-forwarded-for"];
+  const raw = Array.isArray(xff) ? xff.join(",") : xff ?? "";
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+/**
+ * The end client's IP. Behind the trusted proxy, X-Real-IP (nginx sets it from the socket) wins; failing that,
+ * the LAST X-Forwarded-For hop, which is the one the proxy appended. The first hop is whatever the client
+ * typed, so it is never used.
+ */
 export function clientIp(req: Request, trustProxy: boolean): string | null {
   if (trustProxy) {
     const xr = req.headers["x-real-ip"];
     if (typeof xr === "string" && xr.trim()) return xr.trim();
-    const xff = req.headers["x-forwarded-for"];
-    const first = (Array.isArray(xff) ? xff[0] : xff)?.split(",")[0].trim();
-    if (first) return first;
+    const hops = xffHops(req);
+    if (hops.length) return hops[hops.length - 1];
   }
   return req.socket.remoteAddress ?? null;
 }
 
 /** Headers forwarded to the API so its per-IP budget lands on the end client. */
-function forwardHeaders(req: Request, ip: string | null): ForwardHeaders {
+export function forwardHeaders(req: Request, ip: string | null): ForwardHeaders {
   const out: ForwardHeaders = {};
   if (ip) out["x-real-ip"] = ip;
-  const xff = req.headers["x-forwarded-for"];
-  const chain = Array.isArray(xff) ? xff.join(", ") : xff;
-  out["x-forwarded-for"] = chain ? (ip && !chain.includes(ip) ? `${ip}, ${chain}` : chain) : (ip ?? undefined);
+  const hops = xffHops(req);
+  if (ip && !hops.includes(ip)) hops.unshift(ip);
+  if (hops.length) out["x-forwarded-for"] = hops.join(", ");
   return out;
 }
 
@@ -68,28 +78,35 @@ const rpcError = (res: Response, status: number, code: number, message: string, 
 export function createHttpApp(cfg: Config) {
   const app = express();
   app.disable("x-powered-by");
-  app.use(express.json({ limit: BODY_LIMIT }));
   const limiter = new RateLimiter(cfg.rateLimitPerMin);
   const health = new ApiClient(cfg);
+  const over = (res: Response, retryAfterS: number) =>
+    rpcError(res, 429, -32000, `Over ${cfg.rateLimitPerMin} requests per minute; retry in ${retryAfterS} s.`, { "Retry-After": String(retryAfterS) });
 
-  app.post("/mcp", async (req, res) => {
+  // One unit is charged BEFORE the body is read, so an IP over its budget never gets a 1 MB parse out of us.
+  const preCharge = (req: Request, res: Response, next: NextFunction) => {
+    const rate = limiter.hit(clientIp(req, cfg.trustProxy));
+    if (rate.limited) { over(res, rate.retryAfterS); return; }
+    next();
+  };
+
+  app.post("/mcp", preCharge, express.json({ limit: BODY_LIMIT }), async (req, res) => {
     const ip = clientIp(req, cfg.trustProxy);
     // A JSON-RPC batch is N requests in one POST: it costs N and is capped, otherwise one POST could
-    // fan out into hundreds of API calls while the limiter counted one.
+    // fan out into hundreds of API calls while the limiter counted one. The first unit is already paid.
     const messages = Array.isArray(req.body) ? req.body.length : 1;
-    // Charge before refusing: parsing an oversized body is the expensive part, so it must not be free.
-    const rate = limiter.hit(ip, Date.now(), Math.min(messages, MAX_BATCH));
     if (messages > MAX_BATCH) {
+      limiter.hit(ip, Date.now(), MAX_BATCH - 1); // parsing it was the expensive part; it is not free
       rpcError(res, 400, -32600, `Batch too large: at most ${MAX_BATCH} messages per request.`);
       return;
     }
-    if (messages > cfg.rateLimitPerMin) {
+    if (cfg.rateLimitPerMin > 0 && messages > cfg.rateLimitPerMin) {
       rpcError(res, 400, -32600, `Batch of ${messages} exceeds the ${cfg.rateLimitPerMin}-message budget per minute; it can never be served.`);
       return;
     }
-    if (rate.limited) {
-      rpcError(res, 429, -32000, `Over ${cfg.rateLimitPerMin} requests per minute; retry in ${rate.retryAfterS} s.`, { "Retry-After": String(rate.retryAfterS) });
-      return;
+    if (messages > 1) {
+      const rate = limiter.hit(ip, Date.now(), messages - 1);
+      if (rate.limited) { over(res, rate.retryAfterS); return; }
     }
     try {
       const server = createServer(cfg, forwardHeaders(req, ip));

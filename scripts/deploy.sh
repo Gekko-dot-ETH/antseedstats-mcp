@@ -39,9 +39,11 @@ rsync -az --delete -e "ssh -i $SSH_KEY" \
 "${SSH[@]}" "chown -R $APP_USER:$APP_USER $REMOTE_PATH"
 
 say "[4/5] Install production deps, reload antseed-mcp (by name)"
-"${SSH[@]}" "cd $REMOTE_PATH && runuser -u $APP_USER -- npm ci --omit=dev --no-audit --no-fund 2>&1 | tail -2 \
+# set -o pipefail travels INSIDE the remote command: without it a failed npm ci would exit 0 through tail and
+# pm2 would reload onto a half-installed node_modules.
+"${SSH[@]}" "set -o pipefail; cd $REMOTE_PATH && runuser -u $APP_USER -- npm ci --omit=dev --no-audit --no-fund 2>&1 | tail -2 \
   && runuser -u $APP_USER -- pm2 startOrReload ecosystem.config.cjs --only antseed-mcp --update-env \
-  && runuser -u $APP_USER -- pm2 save >/dev/null"
+  && runuser -u $APP_USER -- pm2 save >/dev/null" || die "remote install/reload failed; prod process left as it was"
 
 say "[5/5] Health"
 sleep 2

@@ -7,6 +7,13 @@
 - HTTP: `/health` runs one API check at a time and remembers a good answer for 30 s (a bad one for 5 s).
 - HTTP: malformed JSON, oversized bodies and other client errors answer as JSON-RPC errors with their own
   status (-32700, 413, 4xx) instead of Express's HTML page; a refused batch is not charged to the budget.
+- HTTP: the per-IP charge happens before the body is parsed; behind the proxy the client IP is X-Real-IP or
+  the last X-Forwarded-For hop (never the first, which the client controls); `MCP_RATE_LIMIT_PER_MIN=0` turns
+  the limiter off; a listen error (port taken) ends the process through the fatal path.
+- Tools: numeric and boolean arguments sent as strings ("10", "true") are accepted, as the REST API accepts them.
+- Tooling: `check-drift` compares parameter schemas (types, enums, bounds) and tool names, not just names;
+  `sync-catalog` output carries no timestamp, so an unchanged catalogue produces no diff; `deploy.sh` aborts
+  when the remote install fails instead of reloading pm2 onto it.
 
 ## 0.1.0 (2026-10-08)
 

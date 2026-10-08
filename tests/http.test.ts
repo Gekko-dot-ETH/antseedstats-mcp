@@ -8,7 +8,7 @@ import { createServer } from "node:http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { loadConfig } from "../src/config.js";
-import { clientIp, createHttpApp, RateLimiter } from "../src/http.js";
+import { clientIp, createHttpApp, forwardHeaders, RateLimiter } from "../src/http.js";
 import { TOOL_COUNT } from "../src/server.js";
 
 const API = process.env.MCP_TEST_API ?? "http://127.0.0.1:3199";
@@ -44,12 +44,44 @@ test("rate limiter: the 61st hit in a minute is limited, unknown IPs fail open",
   assert.equal(rl.hit(null, t0).limited, false);
 });
 
-test("clientIp: proxy headers only when trusted", () => {
+test("clientIp: proxy headers only when trusted; X-Forwarded-For uses the hop the proxy appended (last), never the client's", () => {
   const req = { headers: { "x-real-ip": "9.9.9.9", "x-forwarded-for": "8.8.8.8, 10.0.0.1" }, socket: { remoteAddress: "127.0.0.1" } } as never;
   assert.equal(clientIp(req, true), "9.9.9.9");
   assert.equal(clientIp(req, false), "127.0.0.1");
-  const xffOnly = { headers: { "x-forwarded-for": "8.8.8.8, 10.0.0.1" }, socket: { remoteAddress: "127.0.0.1" } } as never;
-  assert.equal(clientIp(xffOnly, true), "8.8.8.8");
+  const xffOnly = { headers: { "x-forwarded-for": "1.2.3.4, 203.0.113.9" }, socket: { remoteAddress: "127.0.0.1" } } as never;
+  assert.equal(clientIp(xffOnly, true), "203.0.113.9", "1.2.3.4 is what the client typed");
+});
+
+test("forwardHeaders: the client IP leads the chain, compared hop by hop (a prefix is not a match)", () => {
+  const req = { headers: { "x-forwarded-for": "10.0.0.12, 203.0.113.9" } } as never;
+  assert.deepEqual(forwardHeaders(req, "10.0.0.1"), { "x-real-ip": "10.0.0.1", "x-forwarded-for": "10.0.0.1, 10.0.0.12, 203.0.113.9" });
+  assert.deepEqual(forwardHeaders({ headers: {} } as never, "5.5.5.5"), { "x-real-ip": "5.5.5.5", "x-forwarded-for": "5.5.5.5" });
+  assert.deepEqual(forwardHeaders({ headers: { "x-forwarded-for": "5.5.5.5" } } as never, "5.5.5.5"), { "x-real-ip": "5.5.5.5", "x-forwarded-for": "5.5.5.5" });
+  assert.deepEqual(forwardHeaders({ headers: {} } as never, null), {});
+});
+
+test("MCP_RATE_LIMIT_PER_MIN=0 turns the limiter off instead of refusing everything", async () => {
+  const s = await listen(loadConfig({ ANTSEEDSTATS_API_URL: API, MCP_RATE_LIMIT_PER_MIN: "0" }, []));
+  try {
+    const h = { "content-type": "application/json", accept: "application/json, text/event-stream" };
+    const r = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }) });
+    assert.equal(r.status, 200);
+  } finally {
+    s.close();
+  }
+});
+
+test("an IP over budget is refused before its body is parsed", async () => {
+  const s = await listen(loadConfig({ ANTSEEDSTATS_API_URL: API, MCP_RATE_LIMIT_PER_MIN: "1", TRUST_PROXY: "1" }, []));
+  try {
+    const h = { "content-type": "application/json", accept: "application/json, text/event-stream", "x-real-ip": "203.0.113.5" };
+    const first = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }) });
+    assert.equal(first.status, 200);
+    const second = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: "{this would be a parse error if it were parsed" });
+    assert.equal(second.status, 429, "429 from the pre-charge, not 400 from the parser");
+  } finally {
+    s.close();
+  }
 });
 
 test("rate limiter: a batch of 5 costs 5, and a refused batch is not charged", () => {

@@ -37,6 +37,18 @@ test("input schema: address and day validated, limit capped at the MCP ceiling, 
   assert.ok(daily.safeParse({ from: "2026-09-30", to: "2026-10-06" }).success);
 });
 
+test("input schema: numeric and boolean strings are accepted, as the REST API accepts them", () => {
+  const sellers = z.object(inputShape(byId("sellers")));
+  assert.deepEqual(sellers.parse({ limit: "10" }).limit, 10);
+  assert.ok(!sellers.safeParse({ limit: "10.5" }).success);
+  assert.ok(!sellers.safeParse({ limit: "ten" }).success);
+  const prices = z.object(inputShape(byId("prices")));
+  assert.equal(prices.parse({ free: "true" }).free, true);
+  assert.equal(prices.parse({ free: "0" }).free, false);
+  assert.equal(prices.parse({ free: false }).free, false);
+  assert.ok(!prices.safeParse({ free: "yes" }).success);
+});
+
 test("request path: placeholders filled, MCP default limit applied, undefined args dropped", () => {
   assert.equal(requestPath(byId("sellers.detail"), { address: "0xabc" }), "/sellers/0xabc");
   assert.equal(requestPath(byId("sellers"), {}), `/sellers?limit=${MCP_DEFAULT_LIMIT}`);

@@ -23,11 +23,12 @@ async function main(): Promise<void> {
 
   if (argv.includes("--http")) {
     const app = createHttpApp(cfg);
-    await new Promise<void>((resolve) => {
-      app.listen(cfg.port, "127.0.0.1", () => {
+    await new Promise<void>((resolve, reject) => {
+      const srv = app.listen(cfg.port, "127.0.0.1", () => {
         console.error(`[antseedstats-mcp] ${cfg.version}: ${TOOL_COUNT} tools, HTTP on 127.0.0.1:${cfg.port}/mcp, API ${cfg.apiUrl}`);
         resolve();
       });
+      srv.on("error", reject); // EADDRINUSE, EACCES: through the fatal path, not an unhandled event
     });
     return;
   }
