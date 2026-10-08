@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 (2026-10-08)
+
+- HTTP: a JSON-RPC batch costs one unit of the per-IP budget per message and is capped at 10 messages per
+  request, so one POST cannot fan out into many API calls.
+- HTTP: `/health` runs one API check at a time and remembers a good answer for 30 s (a bad one for 5 s).
+- HTTP: malformed JSON, oversized bodies and other client errors answer as JSON-RPC errors with their own
+  status (-32700, 413, 4xx) instead of Express's HTML page; a refused batch is not charged to the budget.
+
 ## 0.1.0 (2026-10-08)
 
 - First release. 14 tools, one per endpoint of the AntSeedStats public API v1, generated from the API's own

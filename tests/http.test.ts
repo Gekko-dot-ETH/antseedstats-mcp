@@ -4,6 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
+import { createServer } from "node:http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { loadConfig } from "../src/config.js";
@@ -49,6 +50,70 @@ test("clientIp: proxy headers only when trusted", () => {
   assert.equal(clientIp(req, false), "127.0.0.1");
   const xffOnly = { headers: { "x-forwarded-for": "8.8.8.8, 10.0.0.1" }, socket: { remoteAddress: "127.0.0.1" } } as never;
   assert.equal(clientIp(xffOnly, true), "8.8.8.8");
+});
+
+test("rate limiter: a batch of 5 costs 5, and a refused batch is not charged", () => {
+  const rl = new RateLimiter(10);
+  assert.equal(rl.hit("1.1.1.1", 0, 5).limited, false);
+  assert.equal(rl.hit("1.1.1.1", 1, 4).limited, false); // 9 used
+  assert.equal(rl.hit("1.1.1.1", 2, 5).limited, true, "9 + 5 does not fit");
+  assert.equal(rl.hit("1.1.1.1", 3, 1).limited, false, "the refused batch left the single request's slot free");
+  assert.equal(rl.hit("1.1.1.1", 4, 1).limited, true, "now full");
+});
+
+test("malformed JSON, oversized bodies and oversized batches come back as JSON-RPC errors", async () => {
+  const s = await listen();
+  try {
+    const h = { "content-type": "application/json", accept: "application/json, text/event-stream" };
+    const bad = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: "{not json" });
+    assert.equal(bad.status, 400);
+    assert.equal(((await bad.json()) as { error: { code: number } }).error.code, -32700);
+    const big = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping", params: { pad: "x".repeat(1_100_000) } }) });
+    assert.equal(big.status, 413);
+    assert.equal(((await big.json()) as { jsonrpc: string }).jsonrpc, "2.0");
+    const batch = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: JSON.stringify(Array.from({ length: 11 }, (_, i) => ({ jsonrpc: "2.0", id: i, method: "ping" }))) });
+    assert.equal(batch.status, 400);
+    assert.match(((await batch.json()) as { error: { message: string } }).error.message, /Batch too large/);
+    const charset = await fetch(`${s.url}/mcp`, { method: "POST", headers: { ...h, "content-type": "application/json; charset=x-unknown" }, body: "{}" });
+    assert.equal(charset.status, 415);
+    assert.equal(((await charset.json()) as { error: { code: number } }).error.code, -32600, "a client-side 4xx keeps its status and is not reported as internal");
+  } finally {
+    s.close();
+  }
+});
+
+test("a batch larger than the per-minute budget is refused as 400, not as a retryable 429", async () => {
+  const s = await listen(loadConfig({ ANTSEEDSTATS_API_URL: API, MCP_RATE_LIMIT_PER_MIN: "3", TRUST_PROXY: "1" }, []));
+  try {
+    const h = { "content-type": "application/json", accept: "application/json, text/event-stream", "x-real-ip": "203.0.113.8" };
+    const r = await fetch(`${s.url}/mcp`, { method: "POST", headers: h, body: JSON.stringify(Array.from({ length: 4 }, (_, i) => ({ jsonrpc: "2.0", id: i, method: "ping" }))) });
+    assert.equal(r.status, 400);
+    assert.match(((await r.json()) as { error: { message: string } }).error.message, /can never be served/);
+  } finally {
+    s.close();
+  }
+});
+
+test("/health hits the API once for concurrent probes and keeps a good answer for 30 s", async () => {
+  // A stub API that counts /api/v1/status hits stands in for AntSeedStats.
+  let hits = 0;
+  const stub = createServer((req, res) => {
+    if (req.url === "/api/v1/status") { hits++; setTimeout(() => { res.writeHead(200, { "content-type": "application/json" }); res.end('{"data":{}}'); }, 150); return; }
+    res.writeHead(404); res.end();
+  });
+  await new Promise<void>((r) => stub.listen(0, "127.0.0.1", r));
+  const stubUrl = `http://127.0.0.1:${(stub.address() as AddressInfo).port}`;
+  const s = await listen(loadConfig({ ANTSEEDSTATS_API_URL: stubUrl }, []));
+  try {
+    const rs = await Promise.all(Array.from({ length: 5 }, () => fetch(`${s.url}/health`)));
+    assert.ok(rs.every((r) => r.status === 200));
+    assert.equal(hits, 1, "five concurrent probes share one in-flight API check");
+    await fetch(`${s.url}/health`);
+    assert.equal(hits, 1, "and a later probe inside the TTL reuses it");
+  } finally {
+    s.close();
+    stub.close();
+  }
 });
 
 test("GET and DELETE /mcp answer 405 as JSON-RPC errors", async () => {
