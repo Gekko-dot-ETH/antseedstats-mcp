@@ -1,6 +1,6 @@
 // End-to-end over Streamable HTTP against a running AntSeedStats API. Set MCP_TEST_API (default
-// http://127.0.0.1:3199, the dev box); the live calls are skipped when that API is unreachable so the unit
-// tests still pass offline.
+// https://antseedstats.com; the dev box is http://127.0.0.1:3199 but it runs old code until rebuilt); the live
+// calls are skipped when that API is unreachable so the unit tests still pass offline.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
@@ -11,7 +11,7 @@ import { loadConfig } from "../src/config.js";
 import { clientIp, createHttpApp, forwardHeaders, RateLimiter } from "../src/http.js";
 import { TOOL_COUNT } from "../src/server.js";
 
-const API = process.env.MCP_TEST_API ?? "http://127.0.0.1:3199";
+const API = process.env.MCP_TEST_API ?? "https://antseedstats.com";
 
 async function apiUp(): Promise<boolean> {
   try {

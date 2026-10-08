@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 (2026-10-09)
+
+- Seventeen new tools from site 2.10 (every page now has a twin): `antseedstats_buyers`, `buyers_detail`,
+  `buyers_daily`, `staking_pools`, `staking_positions`, `rewards_current`, `rewards_pools`, `diem`, `channels`,
+  `channels_detail`, `requests`, `transactions`, `labs`, `labs_detail`, `distribution`, `ants_holders` and
+  `registry` (the on-chain wash registry only; clusters stay a flag). Thirty-five tools in all.
+- Tests and `scripts/deploy.sh` default `MCP_TEST_API` to `https://antseedstats.com`, so the live tests run
+  against prod instead of being silently skipped when nothing listens on the dev box's 3199.
+
 ## 0.2.0 (2026-10-08)
 
 - Four new tools from site 2.9: `antseedstats_search` (names to ids), `antseedstats_estimate` (the calculator),

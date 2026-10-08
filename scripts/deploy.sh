@@ -22,7 +22,9 @@ say "[1/5] Build and test locally"
 cd "$REPO_DIR"
 VERSION=$(node -p "require('./package.json').version")
 npm run build
-npm test
+# The live tests need an API that serves the current catalogue; the dev box's 3199 runs old code until rebuilt,
+# so the default is prod (deploy the site first).
+MCP_TEST_API="${MCP_TEST_API:-https://antseedstats.com}" npm test
 
 say "[2/5] Pre-flight on prod"
 PROD_NODE=$("${SSH[@]}" "runuser -u $APP_USER -- node --version") || die "cannot reach prod over Tailscale"

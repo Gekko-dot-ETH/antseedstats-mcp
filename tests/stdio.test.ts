@@ -1,12 +1,12 @@
 // The stdio transport, as Claude Desktop, Cursor and VS Code spawn it. Runs the TypeScript entry through tsx so
-// no build is needed; needs a reachable API (MCP_TEST_API, default the dev box) or it is skipped.
+// no build is needed; needs a reachable API (MCP_TEST_API, default prod) or it is skipped.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { TOOL_COUNT } from "../src/server.js";
 
-const API = process.env.MCP_TEST_API ?? "http://127.0.0.1:3199";
+const API = process.env.MCP_TEST_API ?? "https://antseedstats.com";
 
 async function apiUp(): Promise<boolean> {
   try {

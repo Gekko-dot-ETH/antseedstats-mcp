@@ -57,7 +57,7 @@ npx @antseedstats/mcp-server --http            # 127.0.0.1:3200/mcp and /health
 PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-server --http
 ```
 
-## Tools (18)
+## Tools (35)
 
 | Tool | What it answers |
 |------|-----------------|
@@ -78,6 +78,23 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 | `antseedstats_estimate` | Cost of a monthly token mix on AntSeed vs the list price: cheapest, trusted pick, saving |
 | `antseedstats_glossary` | Every definition behind the site's info dots, by page or by search |
 | `antseedstats_changelog` | What changed on the site and the API, newest first |
+| `antseedstats_distribution` | Who the volume concentrates on: top buyers and sellers, HHI, Gini, Lorenz curve |
+| `antseedstats_registry` | AntSeed's on-chain wash registry (the chain's list; our clusters are only ever a flag) |
+| `antseedstats_buyers` | Every buyer with lifetime spend, tokens, requests, plus the escrow totals |
+| `antseedstats_buyers_detail` | One buyer: spend, the sellers it paid, the models it bought, free-tier usage |
+| `antseedstats_buyers_daily` | One buyer's spend per UTC day |
+| `antseedstats_labs` | The labs behind the models, with model counts |
+| `antseedstats_labs_detail` | One lab: profile, links and its models on AntSeed with cheapest prices |
+| `antseedstats_staking_pools` | Every provider pool: stake, power, usage points, reward, APY estimate |
+| `antseedstats_staking_positions` | Every lANTS position: owner, pool, principal, power, lock, state |
+| `antseedstats_rewards_current` | This epoch's budgets and the top earners with projected $ANTS |
+| `antseedstats_rewards_pools` | The pools bucket cut, locked rewards, USDC stake and claims |
+| `antseedstats_diem` | The DIEM pool: stake, USDC paid, APY estimate, top stakers, staked series |
+| `antseedstats_ants_holders` | $ANTS holders by balance, with labels for protocol contracts |
+| `antseedstats_channels` | Payment channel lifecycle counts and the most recently active channels |
+| `antseedstats_channels_detail` | One channel: pair, settled, per-model split, last settlements |
+| `antseedstats_requests` | The live requests feed (per-event usage reports) and the rolling 24h band |
+| `antseedstats_transactions` | Latest on-chain activity across every AntSeed contract, by kind |
 | `antseedstats_status` | Indexer head, lag and subsystems |
 
 Every result starts with a provenance line (the page on antseedstats.com, the Base block it is as of, and
