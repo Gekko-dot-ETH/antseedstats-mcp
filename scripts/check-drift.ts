@@ -21,6 +21,7 @@ function expectedSchema(p: CatalogEndpoint["params"][number]): Record<string, un
     case "address": return { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" };
     case "date": return { type: "string", format: "date" };
     case "int": return { type: "integer", ...(p.min !== undefined ? { minimum: p.min } : {}), ...(p.max !== undefined ? { maximum: p.max } : {}), ...(p.default !== undefined ? { default: p.default } : {}) };
+    case "number": return { type: "number", ...(p.min !== undefined ? { minimum: p.min } : {}), ...(p.max !== undefined ? { maximum: p.max } : {}), ...(p.default !== undefined ? { default: p.default } : {}) };
     case "enum": return { type: "string", enum: [...(p.enum ?? [])], ...(p.default !== undefined ? { default: p.default } : {}) };
     case "bool": return { type: "boolean" };
     case "string": return { type: "string", maxLength: 200 };

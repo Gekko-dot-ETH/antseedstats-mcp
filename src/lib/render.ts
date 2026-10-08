@@ -16,9 +16,12 @@ export function headerLine(e: CatalogEndpoint, env: Envelope, page: string): str
   return `AntSeedStats · ${page} · ${asOf} · sources: ${sources}`;
 }
 
-export function renderResult(e: CatalogEndpoint, env: Envelope, page: string): { content: { type: "text"; text: string }[] } {
+export type ToolResult = { content: { type: "text"; text: string }[]; structuredContent: { data: unknown; meta: Envelope["meta"] } };
+
+/** Text for every client, plus `structuredContent` (validated against the tool's outputSchema) for the ones that read it. */
+export function renderResult(e: CatalogEndpoint, env: Envelope, page: string): ToolResult {
   const text = [headerLine(e, env, page), JSON.stringify(env.data), FOOTER].join("\n");
-  return { content: [{ type: "text", text }] };
+  return { content: [{ type: "text", text }], structuredContent: { data: env.data, meta: env.meta } };
 }
 
 export function renderError(message: string): { content: { type: "text"; text: string }[]; isError: true } {

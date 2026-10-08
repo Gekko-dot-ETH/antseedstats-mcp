@@ -25,6 +25,7 @@ export type ToolArgs = Record<string, string | number | boolean | undefined>;
 // Many MCP clients and models send numbers and booleans as strings ("limit": "10", "free": "true"); the REST
 // API accepts those, so the tools do too. Only exact spellings are converted; anything else fails validation.
 const intFromString = (v: unknown) => (typeof v === "string" && /^-?\d+$/.test(v.trim()) ? Number(v.trim()) : v);
+const numberFromString = (v: unknown) => (typeof v === "string" && /^-?\d+(\.\d+)?$/.test(v.trim()) ? Number(v.trim()) : v);
 const boolFromString = (v: unknown) => {
   if (typeof v !== "string") return v;
   const s = v.trim().toLowerCase();
@@ -43,6 +44,7 @@ export function zodFor(p: ApiParam): ZodTypeAny {
       const desc = isLimit ? `Rows to return (1 to ${MCP_MAX_LIMIT}; default ${MCP_DEFAULT_LIMIT})` : p.desc;
       return z.preprocess(intFromString, z.number().int().min(min).max(max)).describe(desc);
     }
+    case "number": return z.preprocess(numberFromString, z.number().min(p.min ?? 0).max(p.max ?? 1e12)).describe(p.desc);
     case "enum": return z.enum([...(p.enum ?? [])] as [string, ...string[]]).describe(p.desc);
     case "bool": return z.preprocess(boolFromString, z.boolean()).describe(p.desc);
     case "string": return z.string().min(1).max(200).describe(p.desc);

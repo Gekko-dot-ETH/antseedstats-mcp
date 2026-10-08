@@ -1,7 +1,7 @@
 // Types of the generated catalogue (src/generated/catalog.ts). They mirror the exported shapes of
 // antseed-stats/src/lib/api/catalog.ts, trimmed to what the MCP needs. Regenerate with `npm run sync-catalog`;
 // never edit the generated file by hand.
-export type ParamType = "address" | "int" | "date" | "enum" | "bool" | "string";
+export type ParamType = "address" | "int" | "number" | "date" | "enum" | "bool" | "string";
 
 export type ApiParam = {
   name: string;

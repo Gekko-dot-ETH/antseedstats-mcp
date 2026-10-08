@@ -13,6 +13,8 @@ export type Meta = {
   generated_at: number;
   max_age_s: number;
   sources: Record<string, string>;
+  /** Where to read what the figures mean (site 2.9+): endpoint docs, the page, the glossary of that page. */
+  docs?: { endpoint: string; page: string; glossary: string };
 };
 
 export type Envelope<T = unknown> = { data: T; meta: Meta };

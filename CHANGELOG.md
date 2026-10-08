@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 (2026-10-08)
+
+- Four new tools from site 2.9: `antseedstats_search` (names to ids), `antseedstats_estimate` (the calculator),
+  `antseedstats_glossary` (every definition behind the tips) and `antseedstats_changelog`. `models_detail` and
+  `prices` take the intent filters (trusted, verified, organic, live, min_reputation, price caps, sort); decimal
+  parameters are accepted as numbers or strings.
+- Every tool declares an `outputSchema` built from the API's response schema and returns `structuredContent`
+  (`{ data, meta }`) next to the text; `meta.docs` carries the endpoint docs, the page and the glossary link.
+- Resources: `antseedstats://llms.txt`, `llms-full.txt`, `glossary`, `faq`, `openapi.json`, `changelog`.
+- Prompts: `compare_sellers_for_model`, `audit_seller`, `weekly_network_report`.
+
 ## 0.1.2 (2026-10-08)
 
 - The data licence travels with every answer: the result footer and the server instructions state CC BY 4.0

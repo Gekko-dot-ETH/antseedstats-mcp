@@ -57,7 +57,7 @@ npx @antseedstats/mcp-server --http            # 127.0.0.1:3200/mcp and /health
 PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-server --http
 ```
 
-## Tools (14)
+## Tools (18)
 
 | Tool | What it answers |
 |------|-----------------|
@@ -69,11 +69,15 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 | `antseedstats_sellers_daily` | One seller per UTC day (the cross-check against its own ledger) |
 | `antseedstats_sellers_models` | What a seller advertises (signed prices) and what it sold |
 | `antseedstats_models` | Model catalogue: sellers, min and max prices, usage |
-| `antseedstats_models_detail` | Where to buy one model, cheapest first, with reputation and organic flags |
-| `antseedstats_prices` | Every listing with the OpenRouter list price and the saving |
+| `antseedstats_models_detail` | Where to buy one model, trusted first, with intent filters (trusted, verified, organic, live, price caps) |
+| `antseedstats_prices` | Every listing with the OpenRouter list price and the saving, with the same intent filters |
 | `antseedstats_epochs` | Every epoch: emission, seller and buyer points, burn |
 | `antseedstats_epochs_detail` | One epoch; live budgets, usage and projected burn when current |
 | `antseedstats_ants_supply` | $ANTS minted, emitted, burned, staked (canonical token address) |
+| `antseedstats_search` | Names to ids: a seller name, a model in any spelling, a lab, a 0x address or hash |
+| `antseedstats_estimate` | Cost of a monthly token mix on AntSeed vs the list price: cheapest, trusted pick, saving |
+| `antseedstats_glossary` | Every definition behind the site's info dots, by page or by search |
+| `antseedstats_changelog` | What changed on the site and the API, newest first |
 | `antseedstats_status` | Indexer head, lag and subsystems |
 
 Every result starts with a provenance line (the page on antseedstats.com, the Base block it is as of, and
@@ -82,6 +86,20 @@ API's `data` as JSON, then a one-line attribution. Field names and units are the
 [antseedstats.com/developers](https://antseedstats.com/developers).
 
 Lists return 20 rows by default and at most 100 (`limit`); the REST API goes to 1000.
+
+Every tool declares an `outputSchema` (the API's own response schema) and returns `structuredContent`
+(`{ data, meta }`) next to the text, so clients that read typed results need no parsing.
+
+## Resources (6)
+
+The site's backstage, readable from inside the client: `antseedstats://llms.txt` (the front door),
+`antseedstats://llms-full.txt` (everything in one file), `antseedstats://glossary`, `antseedstats://faq`,
+`antseedstats://openapi.json`, `antseedstats://changelog`. One GET each, cached five minutes.
+
+## Prompts (3)
+
+Recipes that chain the tools in the right order: `compare_sellers_for_model` (model, token mix),
+`audit_seller` (address or name), `weekly_network_report`.
 
 ## Configuration
 
