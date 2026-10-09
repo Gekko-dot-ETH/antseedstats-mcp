@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 (2026-10-09)
+
+- Catalogue synced with site 2.11.3: images and video (settlement metadata v4, since 8 October 2026) in
+  `antseedstats_network_daily` (images, video seconds, videos and their spend per UTC day),
+  `antseedstats_network_summary` (`generative_7d`, the last 7 days of images and video), `antseedstats_models`,
+  `antseedstats_models_detail` and `antseedstats_requests` (video seconds and videos). Additive only.
+- README: the "Server disconnected" fix for desktop apps (they start `npx` without your shell's PATH, so node from
+  nvm, Volta, asdf or Homebrew is not found).
+
 ## 0.3.0 (2026-10-09)
 
 - Seventeen new tools from site 2.10 (every page now has a twin): `antseedstats_buyers`, `buyers_detail`,

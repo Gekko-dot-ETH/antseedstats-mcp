@@ -50,6 +50,24 @@ Claude Desktop has no remote URL field yet; bridge it with `mcp-remote` in `clau
 The same block works in Cursor (`.cursor/mcp.json`). VS Code wraps it as `"mcp": { "servers": { … } }`
 (`.vscode/mcp.json`). The local server calls the public API at `https://antseedstats.com`.
 
+### "Server disconnected" in a desktop app
+
+Desktop apps start the command without your shell's PATH. With node from nvm, Volta, asdf or Homebrew a bare
+`npx` is not found and the client reports "Server disconnected". Use the full path (`which npx` in a terminal)
+and pass its directory as PATH:
+
+```json
+{
+  "mcpServers": {
+    "antseedstats": {
+      "command": "/full/path/to/npx",
+      "args": ["-y", "mcp-remote", "https://antseedstats.com/mcp"],
+      "env": { "PATH": "/full/path/to/node/bin:/usr/local/bin:/usr/bin:/bin" }
+    }
+  }
+}
+```
+
 ### Self-hosted HTTP
 
 ```bash
@@ -61,8 +79,8 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 
 | Tool | What it answers |
 |------|-----------------|
-| `antseedstats_network_summary` | Lifetime totals, rolling 24h/7d/30d windows, current epoch |
-| `antseedstats_network_daily` | Per UTC day: settled, users, tokens, free usage |
+| `antseedstats_network_summary` | Lifetime totals, rolling 24h/7d/30d windows, current epoch, 7d images and video |
+| `antseedstats_network_daily` | Per UTC day: settled, users, tokens, free usage, images, video |
 | `antseedstats_leaders` | Last 24h leaders (seller, model by sales, by tokens, free), wash left out |
 | `antseedstats_sellers` | Every seller with lifetime and 7-day figures, trust score, wash flag |
 | `antseedstats_sellers_detail` | One seller: totals, trust parts, verification, stake |
