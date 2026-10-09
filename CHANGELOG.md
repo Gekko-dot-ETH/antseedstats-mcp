@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 (2026-10-10)
+
+- `antseedstats_usage` (site 2.12.0): API calls per UTC day and client family, and the most called endpoints.
+- `antseedstats_ask` (site 2.13.0): ask any question in plain language and get one answer with sources. It is
+  **paid**: $0.03 in USDC on Base per answer through x402, signed with `X402_PRIVATE_KEY` from your own env
+  (stdio only; the hosted server never pays and explains how to enable it instead). No ETH needed.
+- `antseedstats_network_summary` gains `modality_7d` (text, images and video over the last 7 days).
+
 ## 0.4.0 (2026-10-09)
 
 - Catalogue synced with site 2.11.3: images and video (settlement metadata v4, since 8 October 2026) in

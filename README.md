@@ -75,11 +75,11 @@ npx @antseedstats/mcp-server --http            # 127.0.0.1:3200/mcp and /health
 PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-server --http
 ```
 
-## Tools (35)
+## Tools (36)
 
 | Tool | What it answers |
 |------|-----------------|
-| `antseedstats_network_summary` | Lifetime totals, rolling 24h/7d/30d windows, current epoch, 7d images and video |
+| `antseedstats_network_summary` | Lifetime totals, rolling 24h/7d/30d windows, current epoch, 7d spend by modality |
 | `antseedstats_network_daily` | Per UTC day: settled, users, tokens, free usage, images, video |
 | `antseedstats_leaders` | Last 24h leaders (seller, model by sales, by tokens, free), wash left out |
 | `antseedstats_sellers` | Every seller with lifetime and 7-day figures, trust score, wash flag |
@@ -96,6 +96,7 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 | `antseedstats_estimate` | Cost of a monthly token mix on AntSeed vs the list price: cheapest, trusted pick, saving |
 | `antseedstats_glossary` | Every definition behind the site's info dots, by page or by search |
 | `antseedstats_changelog` | What changed on the site and the API, newest first |
+| `antseedstats_usage` | Who reads the API: calls per UTC day and client family, most called endpoints |
 | `antseedstats_distribution` | Who the volume concentrates on: top buyers and sellers, HHI, Gini, Lorenz curve |
 | `antseedstats_registry` | AntSeed's on-chain wash registry (the chain's list; our clusters are only ever a flag) |
 | `antseedstats_buyers` | Every buyer with lifetime spend, tokens, requests, plus the escrow totals |
@@ -124,6 +125,28 @@ Lists return 20 rows by default and at most 100 (`limit`); the REST API goes to 
 
 Every tool declares an `outputSchema` (the API's own response schema) and returns `structuredContent`
 (`{ data, meta }`) next to the text, so clients that read typed results need no parsing.
+
+## Paid tool: `antseedstats_ask`
+
+One question in plain language, one answer with sources, computed by the site from its own data. It costs
+**$0.03 in USDC on Base** per answer, paid with [x402](https://x402.org): the server signs a USDC authorisation
+for the exact price with a key from **your** environment and the facilitator settles it (no ETH needed). You pay
+only for a successful answer. Terms: [antseedstats.com/developers#ask](https://antseedstats.com/developers#ask).
+
+```json
+{
+  "mcpServers": {
+    "antseedstats": {
+      "command": "npx",
+      "args": ["-y", "@antseedstats/mcp-server"],
+      "env": { "X402_PRIVATE_KEY": "0x… (a dedicated Base wallet with a little USDC)" }
+    }
+  }
+}
+```
+
+The key is read only in local (stdio) mode and never leaves the process. The hosted server at
+`antseedstats.com/mcp` never pays; there the tool explains how to enable it. All the other tools stay free.
 
 ## Resources (6)
 

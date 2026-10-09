@@ -32,7 +32,10 @@ const canon = (o: unknown): string => JSON.stringify(o, (_, v) => (v && typeof v
 const problems: string[] = [];
 const livePaths = new Set(Object.keys(doc.paths));
 const ourPaths = new Set(CATALOG.map((e) => e.path));
-for (const p of livePaths) if (!ourPaths.has(p)) problems.push(`live has ${p}, generated catalogue does not`);
+// Paths the site documents outside the catalogue on purpose: /ask is the paid POST (site 2.13.0), served by the
+// hand-written antseedstats_ask tool (src/lib/ask.ts), not a generated one.
+const OUTSIDE_CATALOGUE = new Set(["/ask"]);
+for (const p of livePaths) if (!ourPaths.has(p) && !OUTSIDE_CATALOGUE.has(p)) problems.push(`live has ${p}, generated catalogue does not`);
 for (const p of ourPaths) if (!livePaths.has(p)) problems.push(`generated catalogue has ${p}, live does not`);
 
 for (const e of CATALOG) {

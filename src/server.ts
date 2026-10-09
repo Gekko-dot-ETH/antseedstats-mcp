@@ -11,13 +11,15 @@ import { outputShape } from "./lib/schema.js";
 import { RESOURCES, readResource } from "./lib/resources.js";
 import { PROMPTS } from "./lib/prompts.js";
 import { buildTools, pageUrl, requestPath, type ToolArgs } from "./tools.js";
+import { ASK_TOOL, askPaid } from "./lib/ask.js";
 
 export const TOOLS = buildTools(CATALOG);
-export const TOOL_COUNT = TOOLS.length;
+// The catalogue tools plus antseedstats_ask (the paid question endpoint, outside the catalogue).
+export const TOOL_COUNT = TOOLS.length + 1;
 export const RESOURCE_COUNT = RESOURCES.length;
 export const PROMPT_COUNT = PROMPTS.length;
 
-export function createServer(cfg: Config, forward: ForwardHeaders = {}): McpServer {
+export function createServer(cfg: Config, forward: ForwardHeaders = {}, hosted = false): McpServer {
   const server = new McpServer({ name: cfg.name, version: cfg.version }, { instructions: INSTRUCTIONS });
   const api = new ApiClient(cfg, forward);
 
@@ -45,6 +47,24 @@ export function createServer(cfg: Config, forward: ForwardHeaders = {}): McpServ
       },
     );
   }
+
+  server.registerTool(
+    ASK_TOOL,
+    {
+      title: "Ask AntSeedStats (paid)",
+      description: "Ask any question about AntSeed in plain language and get one answer with sources, computed from this site's data. PAID: $0.03 in USDC on Base per answer via x402, signed with X402_PRIVATE_KEY from this server's env (local stdio only; never on the hosted server). Without a key it explains how to enable it. Prefer the free tools when one of them answers the question directly.",
+      inputSchema: { question: z.string().min(1).max(500).describe("The question, in plain language (up to 500 characters)") },
+      annotations: { title: "Ask AntSeedStats (paid)", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    },
+    async ({ question }: { question: string }) => {
+      try {
+        const r = await askPaid(cfg, question, hosted);
+        return { content: [{ type: "text" as const, text: r.text }], isError: !r.ok };
+      } catch (err) {
+        return renderError(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
 
   for (const r of RESOURCES) {
     server.registerResource(r.name, r.uri, { title: r.title, description: r.description, mimeType: r.mimeType }, async (uri) => ({

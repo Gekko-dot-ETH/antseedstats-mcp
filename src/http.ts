@@ -109,7 +109,7 @@ export function createHttpApp(cfg: Config) {
       if (rate.limited) { over(res, rate.retryAfterS); return; }
     }
     try {
-      const server = createServer(cfg, forwardHeaders(req, ip));
+      const server = createServer(cfg, forwardHeaders(req, ip), true); // hosted: antseedstats_ask never pays
       const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
       res.on("close", () => { void transport.close(); void server.close(); });
       await server.connect(transport);

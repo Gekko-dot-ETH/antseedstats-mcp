@@ -25,6 +25,9 @@ export type Config = {
   /** HTTP mode: requests per IP per rolling minute at the MCP layer. */
   rateLimitPerMin: number;
   port: number;
+  /** stdio only: a Base private key from the user's own env (X402_PRIVATE_KEY) that lets antseedstats_ask pay for
+   *  answers. Always null in HTTP mode: the hosted server must never pay for strangers. */
+  payKey: `0x${string}` | null;
 };
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, argv: string[] = process.argv.slice(2)): Config {
@@ -42,6 +45,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, argv: string[] 
     trustProxy: env.TRUST_PROXY === "1" || env.TRUST_PROXY === "true",
     rateLimitPerMin: Number(env.MCP_RATE_LIMIT_PER_MIN ?? 60),
     port: Number(flag("--port") ?? env.PORT ?? 3200),
+    payKey: !argv.includes("--http") && /^0x[0-9a-fA-F]{64}$/.test(env.X402_PRIVATE_KEY ?? "") ? (env.X402_PRIVATE_KEY as `0x${string}`) : null,
   };
 }
 

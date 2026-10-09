@@ -11,6 +11,6 @@ test("README lists every tool and the right count", () => {
   for (const e of CATALOG) assert.ok(readme.includes(`\`${e.tool}\``), `README is missing ${e.tool}`);
   assert.ok(readme.includes(`## Tools (${CATALOG.length})`), `README heading must say Tools (${CATALOG.length})`);
   const listed = [...readme.matchAll(/`(antseedstats_[a-z0-9_]+)`/g)].map((m) => m[1]);
-  const unknown = listed.filter((n) => !CATALOG.some((e) => e.tool === n));
+  const unknown = listed.filter((n) => n !== "antseedstats_ask" && !CATALOG.some((e) => e.tool === n)); // ask: paid, hand-written
   assert.deepEqual(unknown, [], "README names tools the catalogue does not have");
 });
