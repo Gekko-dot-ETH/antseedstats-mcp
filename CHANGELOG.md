@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 (2026-10-10)
+
+- Catalogue synced with site 2.13.1: `antseedstats_buyers` sorts by `spent_7d` and every row carries the spend of
+  the rolling last 7 days.
+
 ## 0.5.0 (2026-10-10)
 
 - `antseedstats_usage` (site 2.12.0): API calls per UTC day and client family, and the most called endpoints.
