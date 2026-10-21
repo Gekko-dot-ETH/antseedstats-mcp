@@ -102,12 +102,16 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 | `antseedstats_buyers` | Every buyer with lifetime spend, tokens, requests, plus the escrow totals |
 | `antseedstats_buyers_detail` | One buyer: spend, the sellers it paid, the models it bought, free-tier usage |
 | `antseedstats_buyers_daily` | One buyer's spend per UTC day |
+| `antseedstats_buyers_rewards` | One buyer's $ANTS: earned, claimed, staked |
 | `antseedstats_labs` | The labs behind the models, with model counts |
 | `antseedstats_labs_detail` | One lab: profile, links and its models on AntSeed with cheapest prices |
 | `antseedstats_staking_pools` | Every provider pool: stake, power, usage points, reward, APY estimate |
 | `antseedstats_staking_positions` | Every lANTS position: owner, pool, principal, power, lock, state |
 | `antseedstats_rewards_current` | This epoch's budgets and the top earners with projected $ANTS |
 | `antseedstats_rewards_pools` | The pools bucket cut, locked rewards, USDC stake and claims |
+| `antseedstats_referrals` | AIP-6 referrers ranked: new buyers and ANTS (`live: false`, empty until the contracts deploy) |
+| `antseedstats_referrals_detail` | One wallet's referral rank, buyers, ANTS, invites (dormant, as above) |
+| `antseedstats_referrals_builders` | AIP-6 builders: apps credited for usage (dormant, as above) |
 | `antseedstats_diem` | The DIEM pool: stake, USDC paid, APY estimate, top stakers, staked series |
 | `antseedstats_ants_holders` | $ANTS holders by balance, with labels for protocol contracts |
 | `antseedstats_channels` | Payment channel lifecycle counts and the most recently active channels |
