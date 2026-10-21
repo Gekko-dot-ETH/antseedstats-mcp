@@ -75,7 +75,7 @@ npx @antseedstats/mcp-server --http            # 127.0.0.1:3200/mcp and /health
 PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-server --http
 ```
 
-## Tools (36)
+## Tools (40)
 
 | Tool | What it answers |
 |------|-----------------|
