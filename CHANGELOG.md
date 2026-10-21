@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2 (2026-10-21)
+
+- The seller examples (`antseedstats_sellers_detail`, `_daily`, `_models`) and the `antseedstats_search` prompt no longer
+  name one seller; they use Venice.ai Proxy, the network's largest verified seller.
+- Catalogue synced with the site (3f70da2): every field the API added since 0.5.1 — routing services (`routers`), the
+  free-model trust part (`free_models`), the "Other models" bucket (`model: "other"`) and the staking pool totals.
+
 ## 0.5.1 (2026-10-10)
 
 - Catalogue synced with site 2.13.1: `antseedstats_buyers` sorts by `spent_7d` and every row carries the spend of
