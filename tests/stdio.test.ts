@@ -38,7 +38,7 @@ test("stdio: list tools, call a model lookup and a daily series", { skip: !(awai
     assert.equal(data.model, "kimi-k3");
     assert.ok(data.sellers.length > 0);
 
-    const daily = await client.callTool({ name: "antseedstats_sellers_daily", arguments: { address: "0xd19ffae0e85b5230422019926b2f37ec0f1f41f3", from: "2026-10-01", to: "2026-10-07" } });
+    const daily = await client.callTool({ name: "antseedstats_sellers_daily", arguments: { address: "0x1f228613116e2d08014dfdcc198377c8dedf18c9", from: "2026-10-01", to: "2026-10-07" } });
     const days = (JSON.parse((daily.content as { text: string }[])[0].text.split("\n")[1]) as { days: { day: string }[] }).days;
     assert.equal(days.length, 7);
     assert.equal(days[0].day, "2026-10-01");

@@ -30,7 +30,7 @@ test("input schema: address and day validated, limit capped at the MCP ceiling, 
   const detail = z.object(inputShape(byId("sellers.detail")));
   assert.ok(!detail.safeParse({}).success, "path param required");
   assert.ok(!detail.safeParse({ address: "0x12" }).success);
-  assert.ok(detail.safeParse({ address: "0xD19FFAE0E85B5230422019926B2F37EC0F1F41F3" }).success, "any case accepted");
+  assert.ok(detail.safeParse({ address: "0x1F228613116E2D08014DFDCC198377C8DEDF18C9" }).success, "any case accepted");
 
   const daily = z.object(inputShape(byId("network.daily")));
   assert.ok(!daily.safeParse({ from: "2026/09/30" }).success);
