@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 (2026-11-21)
+
+- 14 new tools, one per endpoint the site added since 0.5.2: `antseedstats_network_health`,
+  `antseedstats_sellers_checks`, `antseedstats_models_checks`, `antseedstats_models_images`, `antseedstats_models_video`,
+  `antseedstats_models_speech`, `antseedstats_buyers_top`, `antseedstats_buyers_days`, `antseedstats_buyers_history`,
+  `antseedstats_buyers_free_to_paid`, `antseedstats_buyers_escrow`, `antseedstats_staking_free`,
+  `antseedstats_diem_proxy` and `antseedstats_ants_overview`.
+- Catalogue synced with the site (8f58deb): sellers are called providers in the descriptions (tool names and API
+  fields keep `seller`), a seller that rotated its key answers under any of its keys with `previous_keys` and `keys`,
+  and `network_summary` carries `active_users` and `tokens_consumed`.
+
 ## 0.5.2 (2026-10-21)
 
 - The seller examples (`antseedstats_sellers_detail`, `_daily`, `_models`) and the `antseedstats_search` prompt no longer

@@ -75,23 +75,30 @@ npx @antseedstats/mcp-server --http            # 127.0.0.1:3200/mcp and /health
 PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-server --http
 ```
 
-## Tools (40)
+## Tools (54)
 
 | Tool | What it answers |
 |------|-----------------|
 | `antseedstats_network_summary` | Lifetime totals, rolling 24h/7d/30d windows, current epoch, 7d spend by modality |
 | `antseedstats_network_daily` | Per UTC day: settled, users, tokens, free usage, images, video |
+| `antseedstats_network_health` | Services providers report failing right now |
 | `antseedstats_leaders` | Last 24h leaders (seller, model by sales, by tokens, free), wash left out |
 | `antseedstats_sellers` | Every seller with lifetime and 7-day figures, trust score, wash flag |
 | `antseedstats_sellers_detail` | One seller: totals, trust parts, verification, stake |
 | `antseedstats_sellers_daily` | One seller per UTC day (the cross-check against its own ledger) |
+| `antseedstats_sellers_checks` | Model checks of one provider: which models passed, by approved auditors |
 | `antseedstats_sellers_models` | What a seller advertises (signed prices) and what it sold |
 | `antseedstats_models` | Model catalogue: sellers, min and max prices, usage |
 | `antseedstats_models_detail` | Where to buy one model, trusted first, with intent filters (trusted, verified, organic, live, price caps) |
+| `antseedstats_models_checks` | Model checks for one model: which providers passed |
+| `antseedstats_models_images` | Images: spend, volume and the models behind them |
+| `antseedstats_models_video` | Video: spend, volume and the models behind them |
+| `antseedstats_models_speech` | Speech: spend, volume and the models behind them |
 | `antseedstats_prices` | Every listing with the OpenRouter list price and the saving, with the same intent filters |
 | `antseedstats_epochs` | Every epoch: emission, seller and buyer points, burn |
 | `antseedstats_epochs_detail` | One epoch; live budgets, usage and projected burn when current |
 | `antseedstats_ants_supply` | $ANTS minted, emitted, burned, staked (canonical token address) |
+| `antseedstats_ants_overview` | $ANTS at a glance: supply, burn, holders |
 | `antseedstats_search` | Names to ids: a seller name, a model in any spelling, a lab, a 0x address or hash |
 | `antseedstats_estimate` | Cost of a monthly token mix on AntSeed vs the list price: cheapest, trusted pick, saving |
 | `antseedstats_glossary` | Every definition behind the site's info dots, by page or by search |
@@ -100,6 +107,11 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 | `antseedstats_distribution` | Who the volume concentrates on: top buyers and sellers, HHI, Gini, Lorenz curve |
 | `antseedstats_registry` | AntSeed's on-chain wash registry (the chain's list; our clusters are only ever a flag) |
 | `antseedstats_buyers` | Every buyer with lifetime spend, tokens, requests, plus the escrow totals |
+| `antseedstats_buyers_top` | Who is buying now: this week's top buyers |
+| `antseedstats_buyers_days` | Buyers per UTC day, paid and free |
+| `antseedstats_buyers_history` | Buyers since the start: retention by cohort |
+| `antseedstats_buyers_free_to_paid` | Buyers who went from the free tier to paying |
+| `antseedstats_buyers_escrow` | Buyer escrow: deposited, withdrawn, net |
 | `antseedstats_buyers_detail` | One buyer: spend, the sellers it paid, the models it bought, free-tier usage |
 | `antseedstats_buyers_daily` | One buyer's spend per UTC day |
 | `antseedstats_buyers_rewards` | One buyer's $ANTS: earned, claimed, staked |
@@ -107,12 +119,14 @@ PORT=4000 ANTSEEDSTATS_API_URL=http://127.0.0.1:3199 npx @antseedstats/mcp-serve
 | `antseedstats_labs_detail` | One lab: profile, links and its models on AntSeed with cheapest prices |
 | `antseedstats_staking_pools` | Every provider pool: stake, power, usage points, reward, APY estimate |
 | `antseedstats_staking_positions` | Every lANTS position: owner, pool, principal, power, lock, state |
+| `antseedstats_staking_free` | Free AI for stakers: every provider's offer |
 | `antseedstats_rewards_current` | This epoch's budgets and the top earners with projected $ANTS |
 | `antseedstats_rewards_pools` | The pools bucket cut, locked rewards, USDC stake and claims |
 | `antseedstats_referrals` | AIP-6 referrers ranked: new buyers and ANTS (`live: false`, empty until the contracts deploy) |
 | `antseedstats_referrals_detail` | One wallet's referral rank, buyers, ANTS, invites (dormant, as above) |
 | `antseedstats_referrals_builders` | AIP-6 builders: apps credited for usage (dormant, as above) |
 | `antseedstats_diem` | The DIEM pool: stake, USDC paid, APY estimate, top stakers, staked series |
+| `antseedstats_diem_proxy` | The Venice.ai proxy behind the DIEM pool: pool books and its provider |
 | `antseedstats_ants_holders` | $ANTS holders by balance, with labels for protocol contracts |
 | `antseedstats_channels` | Payment channel lifecycle counts and the most recently active channels |
 | `antseedstats_channels_detail` | One channel: pair, settled, per-model split, last settlements |

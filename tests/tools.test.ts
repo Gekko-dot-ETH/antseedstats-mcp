@@ -59,7 +59,7 @@ test("request path: placeholders filled, MCP default limit applied, undefined ar
 });
 
 test("page url: the site page with path params filled", () => {
-  assert.equal(pageUrl(byId("sellers.detail"), { address: "0xabc" }), "https://antseedstats.com/sellers/0xabc");
+  assert.equal(pageUrl(byId("sellers.detail"), { address: "0xabc" }), "https://antseedstats.com/providers/0xabc");
   assert.equal(pageUrl(byId("network.summary"), {}), "https://antseedstats.com/");
   assert.equal(pageUrl(byId("epochs.detail"), { n: 25 }), "https://antseedstats.com/rewards");
 });

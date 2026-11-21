@@ -13,11 +13,16 @@ export function zodOutput(s: JsonSchema): ZodTypeAny {
     case "integer": t = z.number().int(); break;
     case "number": t = z.number(); break;
     case "boolean": t = z.boolean(); break;
-    case "string": t = s.enum ? z.enum([...s.enum] as [string, ...string[]]) : z.string(); break;
+    // The dialect has no union: a string the catalogue describes as "(number or text)" (the model checks' reference
+    // and answer, e.g. 24 or "Paris") also takes a number, or the SDK would reject real check results.
+    case "string": t = s.enum ? z.enum([...s.enum] as [string, ...string[]]) : /\(number or text\)/.test(s.desc ?? "") ? z.union([z.string(), z.number()]) : z.string(); break;
   }
-  // Objects the API can return as null (e.g. estimate.list, leaders.seller) are declared without `nullable` in the
-  // dialect, so every object and the explicitly nullable scalars accept null.
-  if (s.type === "object" || ("nullable" in s && s.nullable)) t = t.nullable();
+  // Objects the API can return as null (e.g. estimate.list, leaders.seller) were declared without `nullable` in the
+  // dialect before it gained the flag, so every object still accepts null; arrays and scalars only when declared.
+  // A field declared nullable may also be absent: some only appear on request (models.detail seller_share[].days
+  // needs seller_days=true), and the SDK rejects structuredContent with a missing required key.
+  if (s.nullable) t = t.nullish();
+  else if (s.type === "object") t = t.nullable();
   if (s.desc) t = t.describe(s.desc);
   return t;
 }

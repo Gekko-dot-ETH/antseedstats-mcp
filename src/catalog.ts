@@ -19,8 +19,8 @@ export type SourceKind = "chain" | "announce" | "antseedstats";
 export type CacheTierName = "none" | "live" | "catalog" | "history";
 
 export type JsonSchema =
-  | { type: "object"; properties: Record<string, JsonSchema>; desc?: string }
-  | { type: "array"; items: JsonSchema; desc?: string }
+  | { type: "object"; properties: Record<string, JsonSchema>; desc?: string; nullable?: boolean }
+  | { type: "array"; items: JsonSchema; desc?: string; nullable?: boolean }
   | { type: "number" | "integer" | "string" | "boolean"; desc?: string; nullable?: boolean; enum?: readonly string[] };
 
 export type CatalogEndpoint = {
